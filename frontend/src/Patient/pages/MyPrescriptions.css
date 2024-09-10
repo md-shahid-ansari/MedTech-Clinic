@@ -1,0 +1,61 @@
+/* Container styling */
+.prescriptions-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  p {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #555;
+  }
+  
+  /* Table styling */
+  .prescriptions-table {
+    margin-top: 20px;
+  }
+  
+  .prescriptions-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .prescriptions-table th,
+  .prescriptions-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .prescriptions-table th {
+    background-color: #2a3f54;
+    color: white;
+  }
+  
+  .prescriptions-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  .prescriptions-table tr:hover {
+    background-color: #ddd;
+  }
+  
+  /* Download link styling */
+  .download-link {
+    color: #2a3f54;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .download-link:hover {
+    text-decoration: underline;
+  }

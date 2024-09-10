@@ -1,0 +1,85 @@
+.test-results-manage-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+  }
+  
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .upload-section {
+    margin-bottom: 30px;
+  }
+  
+  .upload-section h2 {
+    margin-bottom: 10px;
+  }
+  
+  .upload-section input[type="file"] {
+    display: inline-block;
+    margin-right: 10px;
+  }
+  
+  .upload-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    background-color: #28a745;
+    cursor: pointer;
+  }
+  
+  .upload-btn:hover {
+    background-color: #218838;
+  }
+  
+  .test-results-list table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .test-results-list th,
+  .test-results-list td {
+    padding: 10px;
+    border: 1px solid #ddd;
+  }
+  
+  .test-results-list th {
+    background-color: #f2f2f2;
+  }
+  
+  .edit-btn,
+  .save-btn,
+  .cancel-btn {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    margin-right: 5px;
+  }
+  
+  .edit-btn {
+    background-color: #ffc107;
+  }
+  
+  .edit-btn:hover {
+    background-color: #e0a800;
+  }
+  
+  .save-btn {
+    background-color: #17a2b8;
+  }
+  
+  .save-btn:hover {
+    background-color: #138496;
+  }
+  
+  .cancel-btn {
+    background-color: #dc3545;
+  }
+  
+  .cancel-btn:hover {
+    background-color: #c82333;
+  }
