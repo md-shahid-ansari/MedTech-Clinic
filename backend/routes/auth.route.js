@@ -36,6 +36,11 @@ import { verifyPatient } from "../midlayer/verifyPatient.js";
 import { verifyDoctor } from "../midlayer/verifyDoctor.js";
 import { verifyClinic } from "../midlayer/verifyClinic.js";
 
+import { bookAppointment, 
+    fetchAppoinments, 
+    fetchDoctors 
+} from "../controllers/appointment.controller.js";
+
 
 const router = express.Router();
 
@@ -71,5 +76,10 @@ router.post("/clinic-forgot", clinicForgot);
 router.post("/clinic-reset/:token", clinicReset);
 router.post("/clinic-logout", clinicLogout);
 router.get("/clinic-auth", verifyClinic,authClinic);
+
+
+router.post("/book-appointment", bookAppointment);
+router.post("/fetch-doctors", fetchDoctors);
+router.post("/fetch-appointments", fetchAppoinments);
 
 export default router;

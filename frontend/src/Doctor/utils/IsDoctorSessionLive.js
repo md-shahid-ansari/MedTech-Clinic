@@ -5,7 +5,7 @@ const URL = process.env.REACT_APP_BACKEND_URL; // Replace with your actual backe
 // Function that checks if the doctor session is live and returns the doctor data
 export const IsDoctorSessionLive = async () => {
   try {
-    const response = await axios.get(`${URL}/doctor-auth`, {
+    const response = await axios.get(`${URL}/api/auth/doctor-auth`, {
       withCredentials: true, // Ensure that cookies (like the JWT) are sent with the request
     });
 

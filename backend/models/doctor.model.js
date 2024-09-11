@@ -62,13 +62,13 @@ const doctorSchema = new mongoose.Schema({
     contactNumber: String
   },
   availability: {
-    days: {
-      type: [String], // Array of days available e.g. ['Monday', 'Wednesday']
+    dateUnavailable: {
+      type: [Date], // Array of dates not available
       default: []
     },
     timeSlots: {
       type: [String], // Array of time slots e.g. ['09:00-11:00', '14:00-17:00']
-      default: []
+      default: ['9:00-10:00','10:00-11:00','11:00-12:00','12:00-1:00','2:00-3:00','3:00-4:00']
     }
   },
   patientsManaged: {

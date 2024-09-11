@@ -5,7 +5,7 @@ const URL = process.env.REACT_APP_BACKEND_URL; // Replace with your actual backe
 // Function that checks if the clinic session is live and returns the clinic data
 export const isClinicSessionLive = async () => {
   try {
-    const response = await axios.get(`${URL}/clinic-auth`, {
+    const response = await axios.get(`${URL}/api/auth/clinic-auth`, {
       withCredentials: true, // Ensure that cookies (like the JWT) are sent with the request
     });
 

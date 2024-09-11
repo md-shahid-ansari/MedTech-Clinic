@@ -49,12 +49,12 @@ h1 {
   cursor: pointer;
 }
 
-.time-slot.available {
+.time-slot.selected {
   background-color: #4caf50;
   color: white;
 }
 
-.time-slot.unavailable {
+.time-slot.unSelected {
   background-color: #ccc;
   color: #999;
   cursor: not-allowed;
