@@ -3,7 +3,7 @@ import './PatientRegister.css';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';  // Import axios
 
-const URL = 'http://localhost:5000';
+const URL = process.env.REACT_APP_BACKEND_URL;
 
 const PatientRegister = () => {
 

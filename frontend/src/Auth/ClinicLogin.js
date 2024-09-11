@@ -3,7 +3,7 @@ import './ClinicLogin.css';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const URL = 'http://localhost:5000';
+const URL = process.env.REACT_APP_BACKEND_URL;
 
 const ClinicLogin = () => {
   const [formData, setFormData] = useState({

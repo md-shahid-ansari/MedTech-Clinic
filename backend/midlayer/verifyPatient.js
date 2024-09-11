@@ -14,6 +14,6 @@ export const verifyPatient = (req,res,next) => {
         next();
     } catch (error) {
         console.log("Error in verify token :" , error);
-        res.status(500).json({success:false,masseage:"Error in verify token"});
+        res.status(500).json({success:false,massage:"Error in verify token"});
     }
 }
