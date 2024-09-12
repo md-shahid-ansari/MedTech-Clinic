@@ -37,6 +37,9 @@ import PatientResetPassword from './Auth/PatientResetPassword';
 import DoctorResetPassword from './Auth/DoctorResetPassword';
 import ClinicResetPassword from './Auth/ClinicResetPassword';
 
+import axios from 'axios';
+
+axios.defaults.withCredentials = true;
 
 const App = () => {
   return (

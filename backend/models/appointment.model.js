@@ -28,7 +28,6 @@ const appointmentSchema = new mongoose.Schema({
   },
   serviceType: {
     type: String, // Example: 'General Check-up', 'Pediatric Care'
-    required: true
   },
   status: {
     type: String,

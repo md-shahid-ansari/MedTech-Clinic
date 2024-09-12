@@ -5,10 +5,9 @@ import { Doctor } from "../models/doctor.model.js";
 // Controller for booking an appointment (single clinic setup)
 export const bookAppointment = async (req, res) => {
     const { patientId, doctorId, appointmentDate, timeSlot, serviceType, reasonForVisit, isEmergency } = req.body;
-
     try {
         // Validate required fields
-        if (!patientId || !doctorId || !appointmentDate || !timeSlot || !serviceType) {
+        if (!patientId || !doctorId || !appointmentDate || !timeSlot) {
             throw new Error("All fields are required");
         }
 
@@ -29,11 +28,11 @@ export const bookAppointment = async (req, res) => {
             doctor: doctorId,
             appointmentDate: new Date(appointmentDate),
             timeSlot: timeSlot,
-            status: { $in: ['Pending', 'Scheduled'] } // Only check for active appointments
+            status: { $in: ['Pending', 'Scheduled', 'Rescheduled'] } // Only check for active appointments
         });
 
         if (existingAppointment) {
-            return res.status(400).json({ success: false, message: "The doctor is not available at the selected time slot." });
+            return res.status(404).json({ success: false, message:"The doctor is not available at the selected time slot." });
         }
 
         // Create new appointment
@@ -85,10 +84,10 @@ export const fetchDoctors = async (req, res) => {
 };
 
 // Controller for fetching appoinments
-export const fetchAppoinments = async (req, res) => {
+export const fetchAppointments = async (req, res) => {
     try {
         // Fetch doctors from the database
-        const appointment = await Appointment.find().select('appointmentDate timeSlot');
+        const appointment = await Appointment.find().select('appointmentDate timeSlot doctor');
         
         // Return doctors' data
         res.status(200).json({
@@ -100,6 +99,41 @@ export const fetchAppoinments = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Server error while fetching doctors.'
+        });
+    }
+};
+
+// Controller for fetching patient appointments
+export const fetchMyAppointments = async (req, res) => {
+    const { patientId } = req.body;
+    // Validate that the patientId is provided
+    if (!patientId) {
+        return res.status(400).json({
+            success: false,
+            message: 'Patient ID is required.',
+        });
+    }
+
+    try {
+        // Fetch appointments from the database based on patientId
+        const appointments = await Appointment.find({ patient: patientId });
+        
+        if (!appointments.length) {
+            return res.status(404).json({
+                success: false,
+                message: 'No appointments found for this patient.',
+            });
+        }
+        // Return the appointment data
+        res.status(200).json({
+            success: true,
+            appointments:appointments,  // renamed for consistency
+        });
+    } catch (error) {
+        console.error('Error fetching appointments:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error while fetching appointments.',
         });
     }
 };

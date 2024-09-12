@@ -16,7 +16,7 @@ const PatientSidebar = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${URL}/api/auth/clinic-logout`);
+      const response = await axios.post(`${URL}/api/auth/patient-logout`);
 
       if (response.data.success) {
         // Loged out successfully, navigate to login page

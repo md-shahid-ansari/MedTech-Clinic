@@ -12,8 +12,5 @@ export const generateTokenAndSetCookie = ( res, userId, tokenName) => {
         maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     
-    // Log the response headers
-    console.log('Response Headers:', res.getHeaders());
-
     return token;
 }

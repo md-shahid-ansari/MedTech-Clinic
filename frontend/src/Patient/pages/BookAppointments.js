@@ -15,6 +15,7 @@ const BookAppointments = () => {
     notes: ''
   });
   const [doctors, setDoctors] = useState([]);
+  const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [appointmentHistory, setAppointmentHistory] = useState([]);
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
@@ -23,6 +24,19 @@ const BookAppointments = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const check = async () =>{
+       // Check if the patient is authenticated before submitting
+      const { isAuthenticated, patientData } = await IsPatientSessionLive();
+      if (!isAuthenticated) {
+        setError('You are not authenticated. Please log in again.');
+        navigate('/patient-login');
+        setLoading(false);
+        return;
+      }
+    }
+    check();
+
+
     // Fetch doctor list from the backend on component mount
     const fetchDoctors = async () => {
       try {
@@ -73,6 +87,7 @@ const handleDateChange = (e) => {
   });
 
   const doctor = doctors.find(doc => doc.doctorId == formData.doctorId);
+  setSelectedDoctorId(doctor._id);
   if (doctor) {
     // Assuming selectedDate is in YYYY-MM-DD format and doctor.availability.dateUnavailable contains dates in the same format
     if (!doctor.availability.dateUnavailable.includes(selectedDate)) {
@@ -81,14 +96,19 @@ const handleDateChange = (e) => {
         selected: false
       }));
 
-      // Filter out slots that match any previous appointment for the same doctor on the same date
       timeSlots = timeSlots.filter(slot => {
-        return !appointmentHistory.some(his => 
-          his.doctorId === formData.doctorId && 
-          his.date === selectedDate && 
-          his.time === slot.time
-        );
+        // Check if any entry in appointmentHistory matches the selected criteria
+        return !appointmentHistory.some(his => {
+          // Extract only the yyyy-mm-dd part from his.appointmentDate
+          const appointmentDateOnly = new Date(his.appointmentDate).toISOString().split('T')[0];
+          const id = doctor._id;
+          // Compare doctor, date, and timeSlot
+          return his.doctor === id && 
+                 appointmentDateOnly === selectedDate && 
+                 his.timeSlot === slot.time;
+        });
       });
+       
 
       setAvailableTimeSlots(timeSlots);
     }
@@ -127,15 +147,19 @@ const handleDateChange = (e) => {
 
     // Submit appointment data
     try {
-      const response = await axios.post(`${URL}/book-appointment`, {
-        ...formData,
-        // patientId: patientData.patientId
+      const response = await axios.post(`${URL}/api/auth/book-appointment`, {
+        patientId: patientData._id,
+        doctorId: selectedDoctorId,
+        appointmentDate: selectedDate,
+        timeSlot: selectedTime,
+        reasonForVisit:formData.notes
       });
 
       if (response.data.success) {
         // Redirect appointments
-        navigate('/');
+        navigate('/patient-home/');
       } else {
+        console.log(response.data.message);
         setError(response.data.message);
       }
     } catch (err) {
