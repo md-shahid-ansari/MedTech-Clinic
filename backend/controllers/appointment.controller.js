@@ -124,10 +124,11 @@ export const fetchMyAppointments = async (req, res) => {
                 message: 'No appointments found for this patient.',
             });
         }
+
         // Return the appointment data
         res.status(200).json({
             success: true,
-            appointments:appointments,  // renamed for consistency
+            appointments:appointments
         });
     } catch (error) {
         console.error('Error fetching appointments:', error);

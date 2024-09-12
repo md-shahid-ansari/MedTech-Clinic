@@ -107,3 +107,28 @@ button {
   background-color: #dc3545;
   color: white;
 }
+
+/* Time Slot Styling */
+.time-slot-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.time-slot {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.time-slot.selected {
+  background-color: #4caf50;
+  color: white;
+}
+
+.time-slot.unSelected {
+  background-color: #ccc;
+  color: #999;
+  cursor: not-allowed;
+}

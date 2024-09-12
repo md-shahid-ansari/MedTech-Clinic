@@ -8,6 +8,7 @@ const URL = process.env.REACT_APP_BACKEND_URL;
 
 const MyAppointments = () => {
   const [appointments, setAppointments] = useState([]);
+  const [doctors, setDoctors] = useState([]);
   const [rescheduleId, setRescheduleId] = useState(null);
   const [cancelId, setCancelId] = useState(null); // To handle cancel confirmation
   const [newDate, setNewDate] = useState('');
@@ -15,6 +16,10 @@ const MyAppointments = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [patientData, setPatientData] = useState(null);
+  const [appointmentHistory, setAppointmentHistory] = useState([]);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
 
   const navigate = useNavigate();
 
@@ -53,8 +58,91 @@ const MyAppointments = () => {
       }
     };
 
+    // Fetch doctor list from the backend on component mount
+    const fetchDoctors = async () => {
+      try {
+        const response = await axios.post(`${URL}/api/auth/fetch-doctors`);
+        setDoctors(response.data.doctors);
+      } catch (err) {
+        console.error('Error fetching doctors:', err);
+        setError('Unable to fetch doctors. Please try again.');
+      }
+    };
+
+    //get appointments list to check available slots
+    const fetchAppoinments = async () => {
+      try {
+        const response = await axios.post(`${URL}/api/auth/fetch-appointments`);
+        setAppointmentHistory(response.data.appointment);
+      } catch (err) {
+        console.error('Error fetching appointment:', err);
+        setError('Unable to fetch appointment. Please try again.');
+      }
+    };
+
+    fetchAppoinments();
+    fetchDoctors();
     authenticateAndFetchAppointments();
-  }, [patientData, navigate]);
+  }, []);
+
+
+  const getDoctorName = (id) => {
+    const d = doctors.find((doctor) => doctor._id === id);
+    return d.name + ' ID:' + d.doctorId;
+  }
+
+
+  // Handle date change
+const handleDateChange = (appointmentId) => {
+  const selectedDate = appointmentId.target.value;
+  console.log(appointmentId.target.value)
+  setSelectedDate(selectedDate);
+
+  const doctorId = appointments.find(app => {
+    if (app._id === appointmentId){
+      return app.doctor
+    }
+  })
+
+  const doctor = doctors.find(doc => doc.doctorId == doctorId);
+  if (doctor) {
+    // Assuming selectedDate is in YYYY-MM-DD format and doctor.availability.dateUnavailable contains dates in the same format
+    if (!doctor.availability.dateUnavailable.includes(selectedDate)) {
+      let timeSlots = doctor.availability.timeSlots.map(slot => ({
+        time: slot, 
+        selected: false
+      }));
+
+      timeSlots = timeSlots.filter(slot => {
+        // Check if any entry in appointmentHistory matches the selected criteria
+        return !appointmentHistory.some(his => {
+          // Extract only the yyyy-mm-dd part from his.appointmentDate
+          const appointmentDateOnly = new Date(his.appointmentDate).toISOString().split('T')[0];
+          const id = doctor._id;
+          // Compare doctor, date, and timeSlot
+          return his.doctor === id && 
+                 appointmentDateOnly === selectedDate && 
+                 his.timeSlot === slot.time;
+        });
+      });
+       
+
+      setAvailableTimeSlots(timeSlots);
+    }
+  }
+};
+
+
+  // Handle time slot selection
+  const handleTimeChange = (time) => {
+    setSelectedTime(time);
+
+    const updatedTimeSlots = availableTimeSlots.map(slot => ({
+      ...slot,
+      selected: slot.time === time // Mark the selected time slot
+    }));
+    setAvailableTimeSlots(updatedTimeSlots);
+  };
 
   // Handle cancel confirmation
   const handleCancel = (appointmentId) => {
@@ -109,7 +197,7 @@ const MyAppointments = () => {
           <tbody>
             {appointments.map((appointment) => (
               <tr key={appointment._id}>
-                <td>{appointment.doctor}</td>
+                <td>{getDoctorName(appointment.doctor)}</td>
                 <td>{appointment.appointmentDate}</td>
                 <td>{appointment.timeSlot}</td>
                 <td>{appointment.status}</td>
@@ -140,26 +228,37 @@ const MyAppointments = () => {
         <div className="popup-overlay">
           <div className="popup">
             <h2>Reschedule Appointment</h2>
-            <div>
-              <label>Select New Date:</label>
+            <div className="form-group">
+              <label htmlFor="date">Select Date:</label>
               <input
                 type="date"
-                value={newDate}
-                onChange={(e) => setNewDate(e.target.value)}
+                id="date"
+                name="date"
+                value={selectedDate}
+                onChange={handleDateChange(rescheduleId)}
               />
             </div>
-            <div>
-              <label>Select New Time:</label>
-              <select value={newTime} onChange={(e) => setNewTime(e.target.value)}>
-                <option value="">Select a time slot</option>
-                <option value="09:00">09:00 AM</option>
-                <option value="10:00">10:00 AM</option>
-                <option value="11:00">11:00 AM</option>
-                <option value="13:00">01:00 PM</option>
-                <option value="14:00">02:00 PM</option>
-                <option value="15:00">03:00 PM</option>
-              </select>
-            </div>
+
+
+            <div className="form-group">
+              <label>Select Time Slot:</label>
+              <div className="time-slot-list">
+                {availableTimeSlots.length > 0 ? (
+                  availableTimeSlots.map((slot, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      className={`time-slot ${slot.selected ? 'selected' : 'unselected'}`}
+                      onClick={() => handleTimeChange(slot.time)}  // Use function reference
+                    >
+                      {slot.time}
+                    </button>
+                  ))
+                ) : (
+                  <p>No time slots available for the selected date.</p>
+                )}
+              </div>
+              </div>
             <button className="confirm-button" onClick={confirmReschedule}>Confirm</button>
             <button className="cancel-button" onClick={() => setRescheduleId(null)}>Cancel</button>
           </div>
