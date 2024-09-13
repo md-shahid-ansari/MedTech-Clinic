@@ -87,7 +87,7 @@ export const fetchDoctors = async (req, res) => {
 export const fetchAppointments = async (req, res) => {
     try {
         // Fetch doctors from the database
-        const appointment = await Appointment.find().select('appointmentDate timeSlot doctor');
+        const appointment = await Appointment.find().select('appointmentDate timeSlot doctor status');
         
         // Return doctors' data
         res.status(200).json({
@@ -135,6 +135,117 @@ export const fetchMyAppointments = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Server error while fetching appointments.',
+        });
+    }
+};
+
+
+// Controller for canceling patient appointments
+export const cancelAppointment = async (req, res) => {
+    const { appointmentId } = req.body;
+
+    // Validate that the appointmentId is provided
+    if (!appointmentId) {
+        return res.status(400).json({
+            success: false,
+            message: 'Appointment ID is required.',
+        });
+    }
+
+    try {
+        // Fetch the appointment from the database based on appointmentId
+        const appointment = await Appointment.findById(appointmentId);
+
+        // If no appointment is found
+        if (!appointment) {
+            return res.status(404).json({
+                success: false,
+                message: 'No appointment found with the given ID.',
+            });
+        }
+
+        // Check if the appointment is already canceled
+        if (appointment.status === 'Cancelled') {
+            return res.status(400).json({
+                success: false,
+                message: 'The appointment is already canceled.',
+            });
+        }
+
+        // Update the appointment status to "Cancelled"
+        appointment.status = 'Cancelled';
+        await appointment.save();
+
+        // Return the updated appointment data
+        return res.status(200).json({
+            success: true,
+            message: 'Appointment successfully canceled.',
+            appointment,
+        });
+    } catch (error) {
+        console.error('Error canceling appointment:', error);
+
+        // Handle any server errors
+        return res.status(500).json({
+            success: false,
+            message: 'Server error while canceling the appointment.',
+            error: error.message,
+        });
+    }
+};
+
+// Controller for reshechduling patient appointments
+export const rescheduleAppointment = async (req, res) => {
+    const { appointmentId, newDate, newTimeSlot } = req.body;
+
+    // Validate that the appointmentId is provided
+    if (!appointmentId) {
+        return res.status(400).json({
+            success: false,
+            message: 'Appointment ID is required.',
+        });
+    }
+
+    try {
+        // Fetch the appointment from the database based on appointmentId
+        const appointment = await Appointment.findById(appointmentId);
+
+        // If no appointment is found
+        if (!appointment) {
+            return res.status(404).json({
+                success: false,
+                message: 'No appointment found with the given ID.',
+            });
+        }
+
+        // Check if the appointment is already canceled
+        if (appointment.status === 'Cancelled') {
+            return res.status(400).json({
+                success: false,
+                message: 'The appointment is already canceled.',
+            });
+        }
+
+        // Update the appointment status to "Cancelled"
+        appointment.appointmentDate = new Date(newDate);
+        appointment.appointmentTime = newTimeSlot;
+        appointment.status = 'Rescheduled';
+        await appointment.save();
+
+        // Return the updated appointment data
+        return res.status(200).json({
+            success: true,
+            message: 'Appointment successfully canceled.',
+            appointment,
+        });
+    } catch (error) {
+        console.error('Error reschedule appointment:', error);
+
+        // Handle any server errors
+        return res.status(500).json({
+            success: false,
+            message: 'Server error while rescheduling the appointment.',
+            error: error.message,
         });
     }
 };

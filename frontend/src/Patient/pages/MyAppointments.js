@@ -10,9 +10,7 @@ const MyAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [rescheduleId, setRescheduleId] = useState(null);
-  const [cancelId, setCancelId] = useState(null); // To handle cancel confirmation
-  const [newDate, setNewDate] = useState('');
-  const [newTime, setNewTime] = useState('');
+  const [cancelId, setCancelId] = useState(null); // For cancel confirmation
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [patientData, setPatientData] = useState(null);
@@ -23,11 +21,15 @@ const MyAppointments = () => {
 
   const navigate = useNavigate();
 
-  // Fetch appointments after patient authentication
+  // Fetch appointments and doctors after patient authentication
   useEffect(() => {
+    let isMounted = true;
+
     const authenticateAndFetchAppointments = async () => {
       const { isAuthenticated, patientData } = await IsPatientSessionLive();
-      
+
+      if (!isMounted) return;
+
       if (!isAuthenticated) {
         setError('You are not authenticated. Please log in again.');
         navigate('/patient-login');
@@ -37,106 +39,89 @@ const MyAppointments = () => {
 
       setPatientData(patientData);
 
-      // Fetch appointments after patient data is set
       if (patientData && patientData._id) {
         try {
           const response = await axios.post(`${URL}/api/auth/fetch-my-appointments`, {
             patientId: patientData._id,
           });
-          
+          if (!isMounted) return;
+
           if (response.data.success) {
             setAppointments(response.data.appointments);
           } else {
-            setError('Failed to fetch appointments');
+            setError(response.data.message ||'Failed to fetch appointments');
           }
         } catch (error) {
-          setError('Error fetching appointments');
+          if (isMounted) setError(error.response?.data?.message || error.message || 'Something went wrong while fetching appointments. Please try again.');
           console.error(error.message);
         } finally {
-          setLoading(false);
+          if (isMounted) setLoading(false);
         }
       }
     };
 
-    // Fetch doctor list from the backend on component mount
     const fetchDoctors = async () => {
       try {
         const response = await axios.post(`${URL}/api/auth/fetch-doctors`);
+        if (!isMounted) return;
         setDoctors(response.data.doctors);
       } catch (err) {
         console.error('Error fetching doctors:', err);
-        setError('Unable to fetch doctors. Please try again.');
+        setError(err.response?.data?.message || err.message || 'Something went wrong while fetching doctors. Please try again.')
       }
     };
 
-    //get appointments list to check available slots
-    const fetchAppoinments = async () => {
+    const fetchAppointmentsHistory = async () => {
       try {
         const response = await axios.post(`${URL}/api/auth/fetch-appointments`);
+        if (!isMounted) return;
         setAppointmentHistory(response.data.appointment);
       } catch (err) {
         console.error('Error fetching appointment:', err);
-        setError('Unable to fetch appointment. Please try again.');
+        setError(err.response?.data?.message || err.message || 'Something went wrong while fetching appointments. Please try again.')
       }
     };
-
-    fetchAppoinments();
+    fetchAppointmentsHistory();
     fetchDoctors();
     authenticateAndFetchAppointments();
-  }, []);
-
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate]);
 
   const getDoctorName = (id) => {
-    const d = doctors.find((doctor) => doctor._id === id);
-    return d.name + ' ID:' + d.doctorId;
-  }
+    const doctor = doctors.find((doc) => doc._id === id);
+    return doctor ? `${doctor.name} ID: ${doctor.doctorId}` : 'Unknown Doctor';
+  };
 
+  const handleDateChange = (appointmentId, event) => {
+    const selectedDate = event.target.value;
+    setSelectedDate(selectedDate);
 
-  // Handle date change
-const handleDateChange = (appointmentId) => {
-  const selectedDate = appointmentId.target.value;
-  console.log(appointmentId.target.value)
-  setSelectedDate(selectedDate);
+    const appointment = appointments.find(app => app._id === appointmentId);
+    if (!appointment) return;
 
-  const doctorId = appointments.find(app => {
-    if (app._id === appointmentId){
-      return app.doctor
-    }
-  })
+    const doctor = doctors.find(doc => doc._id === appointment.doctor);
+    if (!doctor) return;
 
-  const doctor = doctors.find(doc => doc.doctorId == doctorId);
-  if (doctor) {
-    // Assuming selectedDate is in YYYY-MM-DD format and doctor.availability.dateUnavailable contains dates in the same format
-    if (!doctor.availability.dateUnavailable.includes(selectedDate)) {
-      let timeSlots = doctor.availability.timeSlots.map(slot => ({
-        time: slot, 
-        selected: false
-      }));
+    if (doctor.availability.dateUnavailable.includes(selectedDate)) return;
 
-      timeSlots = timeSlots.filter(slot => {
-        // Check if any entry in appointmentHistory matches the selected criteria
-        return !appointmentHistory.some(his => {
-          // Extract only the yyyy-mm-dd part from his.appointmentDate
-          const appointmentDateOnly = new Date(his.appointmentDate).toISOString().split('T')[0];
-          const id = doctor._id;
-          // Compare doctor, date, and timeSlot
-          return his.doctor === id && 
-                 appointmentDateOnly === selectedDate && 
-                 his.timeSlot === slot.time;
-        });
+    let timeSlots = doctor.availability.timeSlots.filter(slot => {
+      return !appointmentHistory.some(his => {
+        const appointmentDateOnly = new Date(his.appointmentDate).toISOString().split('T')[0];
+        return his.doctor === doctor._id &&
+               appointmentDateOnly === selectedDate &&
+               his.timeSlot === slot &&
+               his.status !== "Cancelled"; // Include the status check
       });
-       
+    });
 
-      setAvailableTimeSlots(timeSlots);
-    }
-  }
-};
+    setAvailableTimeSlots(timeSlots.map(slot => ({ time: slot, selected: false })));
+  };
 
-
-  // Handle time slot selection
   const handleTimeChange = (time) => {
     setSelectedTime(time);
-
     const updatedTimeSlots = availableTimeSlots.map(slot => ({
       ...slot,
       selected: slot.time === time // Mark the selected time slot
@@ -144,36 +129,78 @@ const handleDateChange = (appointmentId) => {
     setAvailableTimeSlots(updatedTimeSlots);
   };
 
-  // Handle cancel confirmation
   const handleCancel = (appointmentId) => {
-    // Show cancel confirmation popup
     setCancelId(appointmentId);
   };
 
-  const confirmCancel = () => {
-    // Remove appointment from list after cancel confirmation
-    setAppointments(prevAppointments => prevAppointments.filter(app => app._id !== cancelId));
-    setCancelId(null); // Close the popup
+  const confirmCancel = async () => {
+    try {
+      const response = await axios.post(`${URL}/api/auth/cancel-appointment`, {
+        appointmentId: cancelId
+      });
+
+      if (response.data.success) {
+        // Update the specific appointment's status to "Cancelled"
+        setAppointments(prevAppointments => 
+          prevAppointments.map(app => app._id === cancelId ? { ...app, status: 'Cancelled' } : app)
+        );  
+      } else {
+        // Set the error from response or use a default message
+        setError(response.data.message || 'Unable to cancel appointment. Please try again.');
+      }
+    } catch (err) {
+      console.error('Error canceling appointments:', err);
+      // Set the error message based on the caught error
+      setError(err.response?.data?.message || err.message || 'Something went wrong. Please try again.');
+    }
+    
+    setCancelId(null); // Close the popup in any case
+
+    // Clear the error message after 3 seconds
+    setTimeout(() => {
+      setError(null);
+    }, 3000); // 3000 milliseconds = 3 seconds
   };
+  
+  
 
   const handleReschedule = (appointmentId) => {
-    // Open the reschedule popup for this appointment
     setRescheduleId(appointmentId);
   };
 
-  const confirmReschedule = () => {
-    if (newDate && newTime) {
-      setAppointments(prevAppointments =>
-        prevAppointments.map(app =>
-          app._id === rescheduleId
-            ? { ...app, appointmentDate: newDate, timeSlot: newTime }
-            : app
-        )
-      );
-      setRescheduleId(null); // Close the popup
-    } else {
-      alert('Please select both a date and time to reschedule.');
+  const confirmReschedule = async () => {
+    try {
+      const response = await axios.post(`${URL}/api/auth/reschedule-appointment`, {
+        appointmentId: rescheduleId,
+        newDate: selectedDate,
+        newTime: selectedTime
+      });
+      
+      if (response.data.success) {
+        setAppointments(prevAppointments =>
+          prevAppointments.map(app =>
+            app._id === rescheduleId
+              ? { ...app,status:"Rescheduled", appointmentDate: selectedDate, timeSlot: selectedTime }
+              : app
+          )
+        );
+      } else {
+        // Set the error from response or use a default message
+        setError(response.data.message || 'Unable to reschedule appointment. Please try again.');
+      }
+    } catch (err) {
+      console.error('Error reschedule appointments:', err);
+      // Set the error message based on the caught error
+      setError(err.response?.data?.message || err.message || 'Something went wrong. Please try again.');
     }
+    
+    setRescheduleId(null); // Close the popup
+
+    // Clear the error message after 3 seconds
+    setTimeout(() => {
+      setError(null);
+    }, 3000); // 3000 milliseconds = 3 seconds
+
   };
 
   return (
@@ -183,7 +210,7 @@ const handleDateChange = (appointmentId) => {
       {loading && <p>Loading appointments...</p>}
       {error && <p className="error">{error}</p>}
 
-      {!loading && !error && (
+      {!loading && (
         <table className="appointments-table">
           <thead>
             <tr>
@@ -198,7 +225,7 @@ const handleDateChange = (appointmentId) => {
             {appointments.map((appointment) => (
               <tr key={appointment._id}>
                 <td>{getDoctorName(appointment.doctor)}</td>
-                <td>{appointment.appointmentDate}</td>
+                <td>{new Date(appointment.appointmentDate).toISOString().split('T')[0]}</td>
                 <td>{appointment.timeSlot}</td>
                 <td>{appointment.status}</td>
                 <td>
@@ -235,10 +262,9 @@ const handleDateChange = (appointmentId) => {
                 id="date"
                 name="date"
                 value={selectedDate}
-                onChange={handleDateChange(rescheduleId)}
+                onChange={(e) => handleDateChange(rescheduleId, e)}
               />
             </div>
-
 
             <div className="form-group">
               <label>Select Time Slot:</label>
@@ -249,7 +275,7 @@ const handleDateChange = (appointmentId) => {
                       key={index}
                       type="button"
                       className={`time-slot ${slot.selected ? 'selected' : 'unselected'}`}
-                      onClick={() => handleTimeChange(slot.time)}  // Use function reference
+                      onClick={() => handleTimeChange(slot.time)}
                     >
                       {slot.time}
                     </button>
@@ -258,7 +284,8 @@ const handleDateChange = (appointmentId) => {
                   <p>No time slots available for the selected date.</p>
                 )}
               </div>
-              </div>
+            </div>
+
             <button className="confirm-button" onClick={confirmReschedule}>Confirm</button>
             <button className="cancel-button" onClick={() => setRescheduleId(null)}>Cancel</button>
           </div>

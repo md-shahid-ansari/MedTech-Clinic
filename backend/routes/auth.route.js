@@ -37,9 +37,11 @@ import { verifyDoctor } from "../midlayer/verifyDoctor.js";
 import { verifyClinic } from "../midlayer/verifyClinic.js";
 
 import { bookAppointment, 
+    cancelAppointment, 
     fetchAppointments, 
     fetchDoctors, 
-    fetchMyAppointments
+    fetchMyAppointments,
+    rescheduleAppointment
 } from "../controllers/appointment.controller.js";
 
 
@@ -78,10 +80,11 @@ router.post("/clinic-reset/:token", clinicReset);
 router.post("/clinic-logout", clinicLogout);
 router.get("/clinic-auth", verifyClinic,authClinic);
 
-
 router.post("/book-appointment", bookAppointment);
 router.post("/fetch-doctors", fetchDoctors);
 router.post("/fetch-appointments", fetchAppointments);
 router.post("/fetch-my-appointments", fetchMyAppointments);
+router.post("/cancel-appointment", cancelAppointment);
+router.post("/reschedule-appointment", rescheduleAppointment);
 
 export default router;

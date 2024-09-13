@@ -87,15 +87,16 @@ const handleDateChange = (e) => {
   });
 
   const doctor = doctors.find(doc => doc.doctorId == formData.doctorId);
-  setSelectedDoctorId(doctor._id);
+  
   if (doctor) {
+    setSelectedDoctorId(doctor._id);
     // Assuming selectedDate is in YYYY-MM-DD format and doctor.availability.dateUnavailable contains dates in the same format
     if (!doctor.availability.dateUnavailable.includes(selectedDate)) {
       let timeSlots = doctor.availability.timeSlots.map(slot => ({
         time: slot, 
         selected: false
       }));
-
+      
       timeSlots = timeSlots.filter(slot => {
         // Check if any entry in appointmentHistory matches the selected criteria
         return !appointmentHistory.some(his => {
@@ -105,7 +106,8 @@ const handleDateChange = (e) => {
           // Compare doctor, date, and timeSlot
           return his.doctor === id && 
                  appointmentDateOnly === selectedDate && 
-                 his.timeSlot === slot.time;
+                 his.timeSlot === slot.time &&
+                 his.status !== "Cancelled"; // Include the status check
         });
       });
        
