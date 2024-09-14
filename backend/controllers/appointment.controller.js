@@ -86,10 +86,12 @@ export const fetchDoctors = async (req, res) => {
 // Controller for fetching appoinments
 export const fetchAppointments = async (req, res) => {
     try {
-        // Fetch doctors from the database
-        const appointment = await Appointment.find().select('appointmentDate timeSlot doctor status');
+        // Fetch appointment from the database
+        const appointment = await Appointment.find()
+        .populate('patient')
+        .exec();
         
-        // Return doctors' data
+        // Return appoitnments' data
         res.status(200).json({
             success: true,
             appointment: appointment

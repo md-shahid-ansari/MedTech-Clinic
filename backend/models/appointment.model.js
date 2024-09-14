@@ -38,23 +38,25 @@ const appointmentSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  prescription: [{
-    medicineName: String,
-    dosage: String,
-    duration: String // Example: '1 week', '5 days'
-  }],
-  followUpAppointment: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Appointment'
-  },
   isEmergency: {
     type: Boolean,
     default: false
   },
-  paymentStatus: {
-    type: String,
-    enum: ['Pending', 'Paid', 'Cancelled'],
-    default: 'Pending'
+  prescription: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Prescription' 
+  },
+  bill: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Bill'
+  },
+  test: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Test'
+  },
+  record: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Record'
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,

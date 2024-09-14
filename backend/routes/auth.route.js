@@ -43,6 +43,10 @@ import { bookAppointment,
     fetchMyAppointments,
     rescheduleAppointment
 } from "../controllers/appointment.controller.js";
+import { 
+    createPrescription, 
+    fetchMyPrescriptions
+} from "../controllers/prescription.controller.js";
 
 
 const router = express.Router();
@@ -86,5 +90,8 @@ router.post("/fetch-appointments", fetchAppointments);
 router.post("/fetch-my-appointments", fetchMyAppointments);
 router.post("/cancel-appointment", cancelAppointment);
 router.post("/reschedule-appointment", rescheduleAppointment);
+
+router.post("/create-prescription", createPrescription);
+router.post("/fetch-my-prescriptions", fetchMyPrescriptions);
 
 export default router;
