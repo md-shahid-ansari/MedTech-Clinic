@@ -38,6 +38,7 @@ import { verifyClinic } from "../midlayer/verifyClinic.js";
 
 import { bookAppointment, 
     cancelAppointment, 
+    changeStatusOfAppointment, 
     fetchAppointments, 
     fetchDoctors, 
     fetchMyAppointments,
@@ -90,6 +91,7 @@ router.post("/fetch-appointments", fetchAppointments);
 router.post("/fetch-my-appointments", fetchMyAppointments);
 router.post("/cancel-appointment", cancelAppointment);
 router.post("/reschedule-appointment", rescheduleAppointment);
+router.post("/change-status-appointment", changeStatusOfAppointment);
 
 router.post("/create-prescription", createPrescription);
 router.post("/fetch-my-prescriptions", fetchMyPrescriptions);

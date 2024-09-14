@@ -251,3 +251,57 @@ export const rescheduleAppointment = async (req, res) => {
         });
     }
 };
+
+
+// Controller for reshechduling patient appointments
+export const changeStatusOfAppointment = async (req, res) => {
+    const { appointmentId, status } = req.body;
+
+    // Validate that the appointmentId is provided
+    if (!appointmentId) {
+        return res.status(400).json({
+            success: false,
+            message: 'Appointment ID is required.',
+        });
+    }
+
+    try {
+        // Fetch the appointment from the database based on appointmentId
+        const appointment = await Appointment.findById(appointmentId);
+
+        // If no appointment is found
+        if (!appointment) {
+            return res.status(404).json({
+                success: false,
+                message: 'No appointment found with the given ID.',
+            });
+        }
+
+        // Check if the appointment is already canceled
+        if (appointment.status === 'Cancelled') {
+            return res.status(400).json({
+                success: false,
+                message: 'The appointment is already canceled.',
+            });
+        }
+
+        appointment.status = status;
+        await appointment.save();
+
+        // Return the updated appointment data
+        return res.status(200).json({
+            success: true,
+            message: 'Appointment status changes successfully.',
+            appointment,
+        });
+    } catch (error) {
+        console.error('Error status changes appointment:', error);
+
+        // Handle any server errors
+        return res.status(500).json({
+            success: false,
+            message: 'Server error while status changes the appointment.',
+            error: error.message,
+        });
+    }
+};
