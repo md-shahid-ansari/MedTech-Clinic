@@ -269,7 +269,7 @@ export const changeStatusOfAppointment = async (req, res) => {
 
         // Fetch the appointment from the database based on appointmentId
         const appointment = await Appointment.findById(appointmentId);
-
+        
         // If no appointment is found
         if (!appointment) {
             return res.status(404).json({
@@ -285,7 +285,7 @@ export const changeStatusOfAppointment = async (req, res) => {
                 message: 'The appointment is already canceled.',
             });
         }
-
+        console.log(status);
         appointment.status = status;
         await appointment.save();
 

@@ -54,10 +54,6 @@ const appointmentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Test'
   },
-  record: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Record'
-  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', // User (either admin or clinic) who created the appointment

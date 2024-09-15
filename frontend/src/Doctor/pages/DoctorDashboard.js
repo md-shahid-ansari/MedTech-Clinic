@@ -19,6 +19,7 @@ const DoctorDashboard = () => {
   const [appointmentHistory, setAppointmentHistory] = useState([]);
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [testResults, setTestResults] = useState([]);
+  const [allTestResults, setAllTestResults] = useState([]);
 
   const navigate = useNavigate();
 
@@ -81,6 +82,42 @@ const DoctorDashboard = () => {
       }
     } catch (error) {
       setError(error.data.message || 'Failed to fetch tests');
+    }
+
+
+    if (patientId) {
+      try {
+        const response = await axios.post(`${URL}/api/auth/fetch-my-prescriptions`, {
+          patientId: patientId,
+        });
+  
+        if (response.data.success) {
+          setPrescriptions(response.data.prescriptions);
+        } else {
+          setError(response.data.message || 'Failed to fetch prescriptions');
+        }
+      } catch (error) {
+        setError(error.response?.data?.message || error.message || 'Something went wrong while fetching prescriptions. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    try {
+      // Fetch test results once the patient is authenticated
+      const response = await axios.post(`${URL}/api/auth/fetch-test-result`);
+      if (response.data.success) {
+        const temp = response.data.testResults.filter(
+          (item) => item.patient._id === patientId
+        );
+        setAllTestResults(temp);
+      } else {
+        setError(response.data.message || 'Failed to fetch tests');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Something went wrong while fetching tests.');
+    } finally {
+      setLoading(false);
     }
         
   };
@@ -191,6 +228,9 @@ const DoctorDashboard = () => {
   const [isEmergency, setIsEmergency] = useState(false);
   const [loadingPresSub, setLoadingPresSub] = useState(false);
 
+  //to display prescription records
+  const [prescriptions, setPrescriptions] = useState([]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setMedication((prev) => ({
@@ -242,6 +282,54 @@ const DoctorDashboard = () => {
   const handleDownload = (fileId) => {
     window.open(`${URL}/api/auth/test-download/${fileId}`);
   };
+
+
+  const [amount, setAmount] = useState('');
+  const [notes, setNotes] = useState('');
+
+  const handleBillSubmit = async () => {
+    try {
+      // Convert the appointmentDate to 'yyyy-mm-dd' format
+      const formattedDate = new Date(selectedAppointment.appointmentDate).toISOString().split('T')[0];
+  
+      const response = await axios.post(`${URL}/api/auth/create-bill`, {
+        appointmentId: selectedAppointment.appointmentId,
+        date: formattedDate, // Date in 'yyyy-mm-dd' format
+        amount: amount,
+        notes: notes
+      });
+  
+      if (response.data.success) {
+        // Reset the inputs (optional)
+        setAmount('');
+        setNotes('');
+      } else {
+        setError(response.data.message);
+      }
+    } catch (error) {
+      setError('Failed to create a new bill.');
+    }
+  };
+  
+  const handleMarkConsulted = async () => {
+    try {
+      const response = await axios.post(`${URL}/api/auth/change-status-appointment`, {
+        appointmentId: selectedAppointment._id,
+        status: 'Completed'
+      });
+
+      if (!response.data.success) {
+        setError(response.data.message || 'Unable to cancel appointment. Please try again.');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Something went wrong. Please try again.');
+    }
+
+    setTimeout(() => {
+      setError(null);
+    }, 3000);
+  };
+
 
   return (
     <div className="doctor-dashboard-container">
@@ -445,20 +533,117 @@ const DoctorDashboard = () => {
 
           <div className="details-section">
             <h3>Make Bill</h3>
-            <input type="text" placeholder="Enter bill amount" />
-            <input type="text" placeholder="Enter any notes" />
-            <button>Submit Bill</button>
+            <input
+              type="text"
+              placeholder="Enter amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Enter any notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+            <button onClick={handleBillSubmit}>Submit Bill</button>
           </div>
 
           <div className="details-section">
             <h3>Actions</h3>
-            <button>Mark as Consulted</button>
-            <button>View Medical Records</button>
+            <button onClick={handleMarkConsulted}>Mark as Consulted</button>
             <button className="action-btn" onClick={() => handleReschedule(selectedAppointment._id)}>Reschedule Appointment</button>
             <button className="action-btn" onClick={() => handleCancel(selectedAppointment._id)}>Cancel Appointment</button>
           </div>
 
-          
+          <div className="details-section">
+            <h3>Prescription Records</h3>
+            {prescriptions.length === 0 ? (
+              <p>No prescriptions found.</p>
+            ) : (
+              prescriptions.map((prescription) => (
+                <div key={prescription._id} className="prescription-details">
+                  <h2>Prescription ID: {prescription.prescriptionId}</h2>
+                  <div className="prescription-info">
+                    <p><strong>Doctor:</strong> {prescription.doctor.name} (ID: {prescription.doctor.doctorId})</p>
+                    <p><strong>Appointment Date:</strong> {new Date(prescription.appointment.appointmentDate).toLocaleDateString()}</p>
+                    <p><strong>Appointment ID:</strong> {prescription.appointment.appointmentId}</p>
+                  </div>
+                  <div className="medications-section">
+                    <h3>Medications</h3>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Medicine Name</th>
+                          <th>Dosage</th>
+                          <th>Form</th>
+                          <th>Frequency</th>
+                          <th>Duration</th>
+                          <th>Route</th>
+                          <th>Special Instructions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {prescription.medications.map((med, index) => (
+                          <tr key={index}>
+                            <td>{med.medicineName}</td>
+                            <td>{med.dosage}</td>
+                            <td>{med.form}</td>
+                            <td>{med.frequency}</td>
+                            <td>{med.duration}</td>
+                            <td>{med.route}</td>
+                            <td>{med.specialInstructions}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <div className="prescription-info">
+                    <p><strong>Diagnosis:</strong> {prescription.diagnosis}</p>
+                  </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+
+          <div className="details-section">
+            <h3>All Tests & Results Records</h3>
+            <div className="results-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Appointment ID</th>
+                      <th>Patient Name</th>
+                      <th>Patient ID</th>
+                      <th>Test Type</th>
+                      <th>Test Result</th>
+                      <th>File</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allTestResults.map((test) => (
+                      <tr key={test._id}>
+                        <td>{test.appointment.appointmentId}</td>
+                        <td>{test.patient.name}</td>
+                        <td>{test.patient.patientId}</td>
+                        <td>{test.testType}</td>
+                        <td>{test.results}</td>
+                        <td>
+                          {test.fileReference ? (
+                            <button onClick={() => handleDownload(test.fileReference)} className="download-btn">
+                              Download
+                            </button>
+                          ) : (
+                            'No file'
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
         </div>
       )}
 
