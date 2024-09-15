@@ -89,6 +89,7 @@ export const fetchAppointments = async (req, res) => {
         // Fetch appointment from the database
         const appointment = await Appointment.find()
         .populate('patient')
+        .populate('doctor')
         .exec();
         
         // Return appoitnments' data
@@ -199,7 +200,7 @@ export const cancelAppointment = async (req, res) => {
 // Controller for reshechduling patient appointments
 export const rescheduleAppointment = async (req, res) => {
     const { appointmentId, newDate, newTimeSlot } = req.body;
-
+    
     // Validate that the appointmentId is provided
     if (!appointmentId) {
         return res.status(400).json({
@@ -256,7 +257,6 @@ export const rescheduleAppointment = async (req, res) => {
 // Controller for reshechduling patient appointments
 export const changeStatusOfAppointment = async (req, res) => {
     const { appointmentId, status } = req.body;
-
     // Validate that the appointmentId is provided
     if (!appointmentId) {
         return res.status(400).json({
@@ -266,6 +266,7 @@ export const changeStatusOfAppointment = async (req, res) => {
     }
 
     try {
+
         // Fetch the appointment from the database based on appointmentId
         const appointment = await Appointment.findById(appointmentId);
 

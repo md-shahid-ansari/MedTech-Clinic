@@ -41,11 +41,11 @@ const DoctorSidebar = () => {
   return (
     <div className="sidebar">
       <ul>
-        <li><Link to="appointment-manage">Patients</Link></li>
         <li><Link to="doctor-dashboard">Dashboard</Link></li>
-        <li><Link to="consultations-billing">Consultations</Link></li>
-        <li><Link to="prescription-page">Prescription Management</Link></li>
-        <li><Link to="test-results-management">Tests Management</Link></li>
+        <li><Link to="appointment-manage">Appointments</Link></li>
+        <li><Link to="consultations-billing">Billings</Link></li>
+        <li><Link to="prescription-page">Prescriptions</Link></li>
+        <li><Link to="test-results-management">Test Results</Link></li>
       </ul>
       <div className='divForLine'/>
       <div>

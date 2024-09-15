@@ -1,66 +1,118 @@
-import React, { useState } from 'react';
 import './PrescriptionLogs.css';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { IsClinicSessionLive } from '../utils/IsClinicSessionLive';
+import { useNavigate } from 'react-router-dom';
+
+const URL = process.env.REACT_APP_BACKEND_URL; // Ensure this is correctly set in .env
 
 const PrescriptionLogs = () => {
-  // Sample prescription log data
-  const [prescriptions, setPrescriptions] = useState([
-    { id: 1, patient: 'John Doe', doctor: 'Dr. Smith', date: '2024-09-01', prescription: 'Medication A', status: 'Completed' },
-    { id: 2, patient: 'Jane Doe', doctor: 'Dr. Jones', date: '2024-09-02', prescription: 'Medication B', status: 'Pending' },
-    // Add more sample data as needed
-  ]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [prescriptions, setPrescriptions] = useState([]);
+  const navigate = useNavigate();
 
-  const [filter, setFilter] = useState('all');
+  useEffect(() => {
+    const authenticateAndFetchAppointments = async () => {
+      const { isAuthenticated } = await IsClinicSessionLive();
 
-  const handleFilterChange = (e) => {
-    setFilter(e.target.value);
-    // Logic to filter the data based on the selected filter
-  };
+      if (!isAuthenticated) {
+        setError('You are not authenticated. Please log in again.');
+        navigate('/clinic-login');
+        setLoading(false);
+        return;
+      }
+      setLoading(false);
+    };
+
+    authenticateAndFetchAppointments();
+  }, [navigate]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchPrescription = async () => {
+      if (!isMounted) return;
+
+      try {
+        const response = await axios.post(`${URL}/api/auth/fetch-prescriptions`);
+        if (!isMounted) return;
+
+        if (response.data.success) {
+          setPrescriptions(response.data.prescriptions);
+        } else {
+          setError(response.data.message || 'Failed to fetch prescriptions');
+        }
+      } catch (error) {
+        if (isMounted) setError(error.response?.data?.message || error.message || 'Something went wrong while fetching prescriptions. Please try again.');
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+
+    };
+
+    fetchPrescription();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate]);
+
+  if (loading) return <p>Loading prescriptions...</p>;
 
   return (
-    <div className="prescription-logs-container">
-      <h1>Prescription Logs</h1>
+    <div className="prescriptions-container">
+      <h1>Prescriptions Logs</h1>
+      
+      {error && <p className="error">{error}</p>}
 
-      <div className="filter-container">
-        <label htmlFor="filter">Filter by Status:</label>
-        <select id="filter" value={filter} onChange={handleFilterChange}>
-          <option value="all">All</option>
-          <option value="completed">Completed</option>
-          <option value="pending">Pending</option>
-        </select>
-      </div>
-
-      <div className="prescription-list">
-        <table>
-          <thead>
-            <tr>
-              <th>Patient</th>
-              <th>Doctor</th>
-              <th>Date</th>
-              <th>Prescription</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {prescriptions
-              .filter((prescription) => filter === 'all' || prescription.status.toLowerCase() === filter)
-              .map((prescription) => (
-                <tr key={prescription.id}>
-                  <td>{prescription.patient}</td>
-                  <td>{prescription.doctor}</td>
-                  <td>{prescription.date}</td>
-                  <td>{prescription.prescription}</td>
-                  <td>{prescription.status}</td>
-                  <td>
-                    <button className="view-btn">View</button>
-                    <button className="edit-btn">Edit</button>
-                    <button className="delete-btn">Delete</button>
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </div>
+      {prescriptions.length === 0 ? (
+        <p>No prescriptions found.</p>
+      ) : (
+        prescriptions.map((prescription) => (
+          <div key={prescription._id} className="prescription-details">
+            <h2>Prescription ID: {prescription.prescriptionId}</h2>
+            <div className="prescription-info">
+              <p><strong>Patient:</strong> {prescription.patient.name} (ID: {prescription.patient.patientId})</p>
+              <p><strong>Doctor:</strong> {prescription.doctor.name} (ID: {prescription.doctor.doctorId})</p>
+              <p><strong>Appointment Date:</strong> {new Date(prescription.appointment.appointmentDate).toLocaleDateString()}</p>
+              <p><strong>Appointment ID:</strong> {prescription.appointment.appointmentId}</p>
+            </div>
+            <div className="medications-section">
+              <h3>Medications</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Medicine Name</th>
+                    <th>Dosage</th>
+                    <th>Form</th>
+                    <th>Frequency</th>
+                    <th>Duration</th>
+                    <th>Route</th>
+                    <th>Special Instructions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {prescription.medications.map((med, index) => (
+                    <tr key={index}>
+                      <td>{med.medicineName}</td>
+                      <td>{med.dosage}</td>
+                      <td>{med.form}</td>
+                      <td>{med.frequency}</td>
+                      <td>{med.duration}</td>
+                      <td>{med.route}</td>
+                      <td>{med.specialInstructions}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="prescription-info">
+              <p><strong>Diagnosis:</strong> {prescription.diagnosis}</p>
+            </div>
+            </div>
+          </div>
+        ))
+      )}
     </div>
   );
 };

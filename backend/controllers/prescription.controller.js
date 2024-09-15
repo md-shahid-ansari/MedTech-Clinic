@@ -98,3 +98,36 @@ export const fetchMyPrescriptions = async (req, res) => {
   }
 };
 
+// Controller for fetching patient prescriptions
+export const fetchPrescriptions = async (req, res) => {
+  try {
+    // Fetch prescriptions from the database for the given patientId
+    const prescriptions = await Prescription.find()
+      .populate('doctor', 'name doctorId') // Populate doctor details
+      .populate('appointment', 'appointmentDate appointmentId') // Populate appointment details
+      .populate('patient', 'name patientId')
+      .exec();
+
+    // If no prescriptions are found
+    if (prescriptions.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No prescriptions found',
+      });
+    }
+
+    // Return the prescriptions data
+    return res.status(200).json({
+      success: true,
+      prescriptions:prescriptions,
+    });
+
+  } catch (error) {
+    console.error('Error fetching prescriptions:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while fetching prescriptions.',
+    });
+  }
+};
+

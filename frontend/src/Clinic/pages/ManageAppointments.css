@@ -1,73 +1,57 @@
-.appointments-management-container {
-    padding: 20px;
-    background-color: #f9f9f9;
-  }
-  
-  h2 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .filter-container {
-    margin-bottom: 20px;
-  }
-  
-  .filter-container label {
-    margin-right: 10px;
-  }
-  
-  .filter-container select {
-    padding: 5px;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-  }
-  
-  .appointments-list table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .appointments-list th,
-  .appointments-list td {
-    padding: 10px;
-    border: 1px solid #ddd;
-  }
-  
-  .appointments-list th {
-    background-color: #f2f2f2;
-  }
-  
-  .view-btn,
-  .edit-btn,
-  .delete-btn {
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
-    color: white;
-    cursor: pointer;
-    margin-right: 5px;
-  }
-  
-  .view-btn {
-    background-color: #17a2b8;
-  }
-  
-  .view-btn:hover {
-    background-color: #138496;
-  }
-  
-  .edit-btn {
-    background-color: #ffc107;
-  }
-  
-  .edit-btn:hover {
-    background-color: #e0a800;
-  }
-  
-  .delete-btn {
-    background-color: #dc3545;
-  }
-  
-  .delete-btn:hover {
-    background-color: #c82333;
-  }
+.appointments-manage-container {
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.appointments-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.appointments-table th,
+.appointments-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.appointments-table th {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.confirm-btn,
+.reschedule-btn,
+.cancel-btn {
+  padding: 6px 12px;
+  margin: 0 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.confirm-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.reschedule-btn {
+  background-color: #ffc107;
+  color: white;
+}
+
+.cancel-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.confirm-btn:hover,
+.reschedule-btn:hover,
+.cancel-btn:hover {
+  opacity: 0.8;
+}

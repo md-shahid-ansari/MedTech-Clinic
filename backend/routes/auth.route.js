@@ -46,9 +46,24 @@ import { bookAppointment,
 } from "../controllers/appointment.controller.js";
 import { 
     createPrescription, 
-    fetchMyPrescriptions
+    fetchMyPrescriptions,
+    fetchPrescriptions
 } from "../controllers/prescription.controller.js";
-
+import { 
+    createTestResult,
+    downloadTestResult,
+    fetchTestResult,
+    uploadTestResult
+} from "../controllers/test.controller.js";
+import {
+    fetchAllDoctors
+} from "../controllers/doctor.controller.js";
+import { 
+    createBill, 
+    fetchBills, 
+    updateBillStatus 
+} from "../controllers/bill.controller.js";
+import { updateClinicDetails } from "../controllers/clinic.controller.js";
 
 const router = express.Router();
 
@@ -95,5 +110,19 @@ router.post("/change-status-appointment", changeStatusOfAppointment);
 
 router.post("/create-prescription", createPrescription);
 router.post("/fetch-my-prescriptions", fetchMyPrescriptions);
+router.post("/fetch-prescriptions", fetchPrescriptions);
+
+router.post("/create-test-result", createTestResult);
+router.post("/upload-test-result", uploadTestResult);
+router.post("/fetch-test-result", fetchTestResult);
+router.get('/test-download/:fileId', downloadTestResult);
+
+router.post('/fetch-all-doctors', fetchAllDoctors);
+
+router.post('/create-bill', createBill);
+router.post('/fetch-bills', fetchBills);
+router.post('/update-bill-status', updateBillStatus);
+
+router.post('/update-clinic', updateClinicDetails);
 
 export default router;

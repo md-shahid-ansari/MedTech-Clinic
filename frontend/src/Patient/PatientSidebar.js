@@ -41,12 +41,11 @@ const PatientSidebar = () => {
   return (
     <div className="sidebar">
       <ul>
-        <li><Link to="my-appointments">Appointments</Link></li>
-        <li><Link to="my-health-records">Medical Records</Link></li>
-        <li><Link to="my-prescriptions">Prescriptions</Link></li>
-        <li><Link to="billing-payments">Billing</Link></li>
-        <li><Link to="book-appointment">Book Appointmentg</Link></li>
-        <li><Link to="test-result">test results</Link></li>
+        <li><Link to="my-appointments">My Appointments</Link></li>
+        <li><Link to="my-prescriptions">My Prescriptions</Link></li>
+        <li><Link to="billing-payments">My Billings</Link></li>
+        <li><Link to="book-appointment">Book Appointments</Link></li>
+        <li><Link to="test-result">Test Results</Link></li>
       </ul>
       <div className='divForLine'/>
       <div>

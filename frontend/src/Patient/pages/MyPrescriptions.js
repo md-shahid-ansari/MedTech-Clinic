@@ -8,7 +8,6 @@ const URL = process.env.REACT_APP_BACKEND_URL;
 
 const MyPrescriptions = () => {
   const navigate = useNavigate();
-  const [patientData, setPatientData] = useState(null);
   const [prescriptions, setPrescriptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,8 +26,6 @@ const MyPrescriptions = () => {
         setLoading(false);
         return;
       }
-
-      setPatientData(patientData);
 
       if (patientData && patientData._id) {
         try {

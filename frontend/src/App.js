@@ -10,7 +10,6 @@ import MyAppointments from './Patient/pages/MyAppointments';
 import MyPrescriptions from './Patient/pages/MyPrescriptions';
 import TestResults from './Patient/pages/TestResults';
 import BillingPayments from './Patient/pages/BillingPayments';
-import MyHealthRecords from './Patient/pages/MyHealthRecords';
 import PatientProfileSettings from './Patient/pages/PatientProfileSettings';
 
 import DoctorDashboard from './Doctor/pages/DoctorDashboard';
@@ -62,7 +61,6 @@ const App = () => {
           <Route index element={<Navigate to="my-appointments" />} />
 
           <Route path="my-appointments" element={<MyAppointments />} />
-          <Route path="my-health-records" element={<MyHealthRecords />} />
           <Route path="my-prescriptions" element={<MyPrescriptions />} />
           <Route path="billing-payments" element={<BillingPayments />} />
           <Route path="book-appointment" element={<BookAppointment />} />
