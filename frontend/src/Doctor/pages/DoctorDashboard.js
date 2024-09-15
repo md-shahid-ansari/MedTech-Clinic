@@ -18,6 +18,7 @@ const DoctorDashboard = () => {
   const [selectedTime, setSelectedTime] = useState('');
   const [appointmentHistory, setAppointmentHistory] = useState([]);
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
+  const [testResults, setTestResults] = useState([]);
 
   const navigate = useNavigate();
 
@@ -46,12 +47,13 @@ const DoctorDashboard = () => {
 
         if (response.data.success) {
           let temp = response.data.appointment;
-          temp = temp.filter((t) => t.doctor === doctor._id);
+          temp = temp.filter((t) => t.doctor._id === doctor._id);
           setAppointments(temp);
           setAppointmentHistory(temp);
         } else {
           setError(response.data.message || 'Failed to fetch appointments');
         }
+
       } catch (err) {
         setError(err.response?.data?.message || 'Something went wrong while fetching appointments.');
       } finally {
@@ -62,8 +64,25 @@ const DoctorDashboard = () => {
     fetchAppointments();
   }, [doctor]);
 
-  const handleCardClick = (appointment) => {
+  const handleCardClick = async (appointment)  => {
     setSelectedAppointment(appointment);
+    const patientId = appointment.patient._id;
+    const appointmentId = appointment._id
+    try {
+      // Fetch test results once the patient is authenticated
+      const response = await axios.post(`${URL}/api/auth/fetch-test-result`);
+      if (response.data.success) {
+        const temp = response.data.testResults.filter(
+          (item) => item.patient._id === patientId && item.appointment._id === appointmentId
+        );
+        setTestResults(temp);
+      } else {
+        setError(response.data.message || 'Failed to fetch tests');
+      }
+    } catch (error) {
+      setError(error.data.message || 'Failed to fetch tests');
+    }
+        
   };
 
   const handleDateChange = (appointmentId, event) => {
@@ -219,6 +238,11 @@ const DoctorDashboard = () => {
     setLoadingPresSub(false);
   };
 
+
+  const handleDownload = (fileId) => {
+    window.open(`${URL}/api/auth/test-download/${fileId}`);
+  };
+
   return (
     <div className="doctor-dashboard-container">
       <h1>Doctor Dashboard</h1>
@@ -257,10 +281,45 @@ const DoctorDashboard = () => {
           {/* Action Sections */}
 
           <div className="details-section">
-
             <h3>Test Results</h3>
-            <p>Test Result 1: Sample Data</p>
-            <p>Test Result 2: Sample Data</p>
+            {!testResults.length ? (
+              <p>No Tests Found</p>
+            ) : (
+            <div className="results-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Appointment ID</th>
+                    <th>Patient Name</th>
+                    <th>Patient ID</th>
+                    <th>Test Type</th>
+                    <th>Test Result</th>
+                    <th>File</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {testResults.map((test) => (
+                    <tr key={test._id}>
+                      <td>{test.appointment.appointmentId}</td>
+                      <td>{test.patient.name}</td>
+                      <td>{test.patient.patientId}</td>
+                      <td>{test.testType}</td>
+                      <td>{test.results}</td>
+                      <td>
+                        {test.fileReference ? (
+                          <button onClick={() => handleDownload(test.fileReference)} className="download-btn">
+                            Download
+                          </button>
+                        ) : (
+                          'No file'
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+             )}
           </div>
 
 
@@ -387,6 +446,7 @@ const DoctorDashboard = () => {
           <div className="details-section">
             <h3>Make Bill</h3>
             <input type="text" placeholder="Enter bill amount" />
+            <input type="text" placeholder="Enter any notes" />
             <button>Submit Bill</button>
           </div>
 

@@ -103,14 +103,15 @@ export const fetchTestResult = async (req, res) => {
       const testResults = await Test.find()
         .populate('patient')
         .populate('appointment')
+        .populate('doctor')
         .exec();
-  
+        
       return res.status(201).json({
         success: true,
-        testResults,
+        testResults:testResults,
       });
     } catch (error) {
-      console.error('Error creating test result:', error);
+      console.error('Error fetching test result:', error);
       res.status(500).json({ error: error.message });
     }
 };

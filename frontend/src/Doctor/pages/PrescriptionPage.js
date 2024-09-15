@@ -1,118 +1,126 @@
-import React, { useState } from 'react';
 import './PrescriptionPage.css';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { IsDoctorSessionLive } from '../utils/IsDoctorSessionLive';
+import { useNavigate } from 'react-router-dom';
+
+const URL = process.env.REACT_APP_BACKEND_URL; // Ensure this is correctly set in .env
 
 const PrescriptionPage = () => {
-  const [prescriptions, setPrescriptions] = useState([
-    // Sample data
-    { id: 1, patient: 'John Doe', date: '2024-09-01', medication: 'Medication A', notes: 'Follow up in 2 weeks' },
-    { id: 2, patient: 'Jane Smith', date: '2024-09-02', medication: 'Medication B', notes: 'Take with food' },
-  ]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [prescriptions, setPrescriptions] = useState([]);
+  const navigate = useNavigate();
+  const [doctorId, setDoctorId] = useState('');
 
-  const [newPrescription, setNewPrescription] = useState({
-    patient: '',
-    date: '',
-    medication: '',
-    notes: '',
-  });
+  useEffect(() => {
+    const authenticateAndFetchAppointments = async () => {
+      const { isAuthenticated, doctorData } = await IsDoctorSessionLive();
 
-  const handleChange = (e) => {
-    setNewPrescription({
-      ...newPrescription,
-      [e.target.name]: e.target.value,
-    });
-  };
+      if (!isAuthenticated) {
+        setError('You are not authenticated. Please log in again.');
+        navigate('/clinic-login');
+        setLoading(false);
+        return;
+      }
+      setLoading(false);
+      setDoctorId(doctorData._id)
+    };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setPrescriptions([...prescriptions, { ...newPrescription, id: prescriptions.length + 1 }]);
-    setNewPrescription({ patient: '', date: '', medication: '', notes: '' });
-  };
+    authenticateAndFetchAppointments();
+  }, [navigate]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchPrescription = async () => {
+      if (!isMounted) return;
+
+      try {
+        const response = await axios.post(`${URL}/api/auth/fetch-prescriptions`);
+        if (!isMounted) return;
+
+        if (response.data.success) {
+          const temp = response.data.prescriptions.filter(
+            (item) => item.doctor._id === doctorId
+          );
+          
+          setPrescriptions(temp);
+        } else {
+          setError(response.data.message || 'Failed to fetch prescriptions');
+        }
+      } catch (error) {
+        if (isMounted) setError(error.response?.data?.message || error.message || 'Something went wrong while fetching prescriptions. Please try again.');
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+
+    };
+
+    fetchPrescription();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate , doctorId]);
+
+  if (loading) return <p>Loading prescriptions...</p>;
 
   return (
-    <div className="prescription-page-container">
-      <h2>Prescription Management</h2>
-      <div className="prescription-form-container">
-        <h3>Create New Prescription</h3>
-        <form onSubmit={handleSubmit} className="prescription-form">
-          <div className="form-group">
-            <label htmlFor="patient">Patient Name:</label>
-            <input
-              type="text"
-              id="patient"
-              name="patient"
-              value={newPrescription.patient}
-              onChange={handleChange}
-              required
-            />
+    <div className="prescriptions-container">
+      <h1>Prescriptions Logs</h1>
+      
+      {error && <p className="error">{error}</p>}
+
+      {prescriptions.length === 0 ? (
+        <p>No prescriptions found.</p>
+      ) : (
+        prescriptions.map((prescription) => (
+          <div key={prescription._id} className="prescription-details">
+            <h2>Prescription ID: {prescription.prescriptionId}</h2>
+            <div className="prescription-info">
+              <p><strong>Patient:</strong> {prescription.patient.name} (ID: {prescription.patient.patientId})</p>
+              <p><strong>Appointment Date:</strong> {new Date(prescription.appointment.appointmentDate).toLocaleDateString()}</p>
+              <p><strong>Appointment ID:</strong> {prescription.appointment.appointmentId}</p>
+            </div>
+            <div className="medications-section">
+              <h3>Medications</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Medicine Name</th>
+                    <th>Dosage</th>
+                    <th>Form</th>
+                    <th>Frequency</th>
+                    <th>Duration</th>
+                    <th>Route</th>
+                    <th>Special Instructions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {prescription.medications.map((med, index) => (
+                    <tr key={index}>
+                      <td>{med.medicineName}</td>
+                      <td>{med.dosage}</td>
+                      <td>{med.form}</td>
+                      <td>{med.frequency}</td>
+                      <td>{med.duration}</td>
+                      <td>{med.route}</td>
+                      <td>{med.specialInstructions}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="prescription-info">
+                <p><strong>Diagnosis:</strong> {prescription.diagnosis}</p>
+              </div>
+              <div>
+                <button>Edit</button>
+              </div>
+            </div>
           </div>
-
-          <div className="form-group">
-            <label htmlFor="date">Date:</label>
-            <input
-              type="date"
-              id="date"
-              name="date"
-              value={newPrescription.date}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="medication">Medication:</label>
-            <input
-              type="text"
-              id="medication"
-              name="medication"
-              value={newPrescription.medication}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="notes">Notes:</label>
-            <textarea
-              id="notes"
-              name="notes"
-              value={newPrescription.notes}
-              onChange={handleChange}
-              placeholder="Additional instructions or comments"
-            ></textarea>
-          </div>
-
-          <button type="submit" className="submit-btn">Add Prescription</button>
-        </form>
-      </div>
-
-      <div className="prescriptions-list">
-        <h3>Existing Prescriptions</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Patient</th>
-              <th>Date</th>
-              <th>Medication</th>
-              <th>Notes</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {prescriptions.map((prescription) => (
-              <tr key={prescription.id}>
-                <td>{prescription.patient}</td>
-                <td>{prescription.date}</td>
-                <td>{prescription.medication}</td>
-                <td>{prescription.notes}</td>
-                <td>
-                  <button className="edit-btn">Edit</button>
-                  <button className="delete-btn">Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        ))
+      )}
     </div>
   );
 };

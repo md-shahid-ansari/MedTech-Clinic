@@ -1,147 +1,208 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { IsDoctorSessionLive } from '../utils/IsDoctorSessionLive';
+import { useNavigate } from 'react-router-dom';
 import './ConsultationsBilling.css';
 
+const URL = process.env.REACT_APP_BACKEND_URL;
+
 const ConsultationsBilling = () => {
-  // State for consultations and billing entries
-  const [consultations, setConsultations] = useState([
-    {
-      id: 1,
-      patientName: 'John Doe',
-      consultationDate: '2024-09-05',
-      consultationType: 'General Checkup',
-      amount: '₹500',
-      paymentStatus: 'Paid',
-    },
-    {
-      id: 2,
-      patientName: 'Jane Smith',
-      consultationDate: '2024-09-06',
-      consultationType: 'Dental Checkup',
-      amount: '₹700',
-      paymentStatus: 'Pending',
-    },
-    // Add more consultations as needed
-  ]);
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [bills, setBills] = useState([]);
+  const [filter, setFilter] = useState('all');
   const [newBill, setNewBill] = useState({
-    patientName: '',
-    consultationDate: '',
-    consultationType: '',
+    appointmentId: '',
+    date: '',
     amount: '',
-    paymentStatus: 'Pending',
+    notes: ''
   });
+  const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  // Fetch bills and authenticate
+  useEffect(() => {
+    const authenticateAndFetchBills = async () => {
+      const { isAuthenticated } = await IsDoctorSessionLive();
+      if (!isAuthenticated) {
+        setError('You are not authenticated. Please log in again.');
+        navigate('/doctor-login');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await axios.post(`${URL}/api/auth/fetch-bills`);
+        setBills(response.data.bills);
+      } catch (err) {
+        setError('Error fetching bills.');
+      }
+      setLoading(false);
+    };
+
+    authenticateAndFetchBills();
+  }, [navigate]);
+
+  // Handle input changes for the bill form
+  const handleInputChange = (e) => {
     setNewBill({
       ...newBill,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setConsultations([...consultations, { ...newBill, id: consultations.length + 1 }]);
-    setNewBill({
-      patientName: '',
-      consultationDate: '',
-      consultationType: '',
-      amount: '',
-      paymentStatus: 'Pending',
-    });
+  // Handle form submission to create a new bill
+  const handleFormSubmit = async (e) => {
+    // e.preventDefault();
+
+    try {
+      const response = await axios.post(`${URL}/api/auth/create-bill`, {
+        appointmentId:newBill.appointmentId,
+        date:newBill.date,
+        amount:newBill.amount,
+        notes:newBill.notes
+      });
+      if (response.data.success) {
+        setNewBill({ appointmentId: '', date: '', amount: '', notes: '' }); // Reset form
+      } else {
+        setError(response.data.message);
+      }
+    } catch (error) {
+      setError('Failed to create a new bill.');
+    }
+  };
+
+  // Handle filter change
+  const handleFilterChange = (e) => {
+    setFilter(e.target.value);
+  };
+
+  // Mark bill as paid, pending, or cancelled
+  const handleStatusChange = async (billId, newStatus) => {
+    try {
+      await axios.post(`${URL}/api/auth/update-bill-status`, { billId, status: newStatus });
+      setBills(bills.map(bill => bill._id === billId ? { ...bill, status: newStatus } : bill));
+    } catch (error) {
+      setError('Failed to update bill status.');
+    }
   };
 
   return (
-    <div className="consultations-billing-container">
-      <h2>Create and Manage Bills</h2>
+    <div className="billing-management-container">
+      <h2>Billing Management</h2>
 
-      <form onSubmit={handleSubmit} className="billing-form">
-        <h3>Create New Bill</h3>
-        <div className="form-group">
-          <label htmlFor="patientName">Patient Name:</label>
-          <input
-            type="text"
-            id="patientName"
-            name="patientName"
-            value={newBill.patientName}
-            onChange={handleChange}
-            required
+      {/* Bill Creation Form */}
+      <form className="bill-form" onSubmit={handleFormSubmit}>
+        <label>
+          Appointment ID:
+          <input 
+            type="text" 
+            name="appointmentId" 
+            value={newBill.appointmentId} 
+            onChange={handleInputChange} 
+            required 
           />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="consultationDate">Consultation Date:</label>
-          <input
-            type="date"
-            id="consultationDate"
-            name="consultationDate"
-            value={newBill.consultationDate}
-            onChange={handleChange}
-            required
+        </label>
+        <label>
+          Bill Date:
+          <input 
+            type="date" 
+            name="date" 
+            value={newBill.date} 
+            onChange={handleInputChange} 
+            required 
           />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="consultationType">Consultation Type:</label>
-          <input
-            type="text"
-            id="consultationType"
-            name="consultationType"
-            value={newBill.consultationType}
-            onChange={handleChange}
-            required
+        </label>
+        <label>
+          Amount:
+          <input 
+            type="number" 
+            name="amount" 
+            value={newBill.amount} 
+            onChange={handleInputChange} 
+            required 
           />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="amount">Amount:</label>
-          <input
-            type="text"
-            id="amount"
-            name="amount"
-            value={newBill.amount}
-            onChange={handleChange}
-            required
+        </label>
+        <label>
+          Notes:
+          <textarea 
+            name="notes" 
+            value={newBill.notes} 
+            onChange={handleInputChange}
           />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="paymentStatus">Payment Status:</label>
-          <select
-            id="paymentStatus"
-            name="paymentStatus"
-            value={newBill.paymentStatus}
-            onChange={handleChange}
-          >
-            <option value="Pending">Pending</option>
-            <option value="Paid">Paid</option>
-          </select>
-        </div>
-
-        <button type="submit" className="submit-btn">Add Bill</button>
+        </label>
+        <button type="submit" className="submit-btn">Create Bill</button>
       </form>
 
-      <table className="consultations-table">
-        <thead>
-          <tr>
-            <th>Patient Name</th>
-            <th>Consultation Date</th>
-            <th>Consultation Type</th>
-            <th>Amount</th>
-            <th>Payment Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {consultations.map((consultation) => (
-            <tr key={consultation.id}>
-              <td>{consultation.patientName}</td>
-              <td>{consultation.consultationDate}</td>
-              <td>{consultation.consultationType}</td>
-              <td>{consultation.amount}</td>
-              <td>{consultation.paymentStatus}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {/* Filter for Bills */}
+      <div className="filter-container">
+        <label htmlFor="filter">Filter by Status:</label>
+        <select id="filter" value={filter} onChange={handleFilterChange}>
+          <option value="all">All</option>
+          <option value="Paid">Paid</option>
+          <option value="Pending">Pending</option>
+          <option value="Requested">Requested</option>
+        </select>
+      </div>
+
+      {/* Displaying Bills */}
+      <div className="billing-list">
+        {loading ? (
+          <p>Loading bills...</p>
+        ) : error ? (
+          <p className="error-message">{error}</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Appointment ID</th>
+                <th>Patient</th>
+                <th>Doctor</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bills
+                .filter((bill) => filter === 'all' || bill.status === filter)
+                .map((bill) => (
+                  <tr key={bill._id}>
+                    <td>{bill.appointment.appointmentId}</td>
+                    <td>{bill.patient.name + ' ID' + bill.patient.patientId}</td>
+                    <td>{bill.doctor.name + ' ID' + bill.doctor.doctorId}</td>
+                    <td>{bill.amount}</td>
+                    <td>{new Date(bill.billDate).toLocaleDateString()}</td>
+                    <td>{bill.status}</td>
+                    <td>
+                      <button
+                        onClick={() => handleStatusChange(bill._id, 'Paid')}
+                        className="status-btn"
+                        disabled={bill.status === 'Paid'}
+                      >
+                        Mark as Paid
+                      </button>
+                      <button
+                        onClick={() => handleStatusChange(bill._id, 'Pending')}
+                        className="status-btn"
+                        disabled={bill.status === 'Pending'}
+                      >
+                        Mark as Pending
+                      </button>
+                      <button
+                        onClick={() => handleStatusChange(bill._id, 'Cancelled')}
+                        className="status-btn"
+                        disabled={bill.status === 'Cancelled'}
+                      >
+                        Cancel
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 };

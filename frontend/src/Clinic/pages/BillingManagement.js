@@ -52,7 +52,7 @@ const BillingManagement = () => {
 
   // Handle form submission to create a new bill
   const handleFormSubmit = async (e) => {
-    e.preventDefault();
+    // e.preventDefault();
 
     try {
       const response = await axios.post(`${URL}/api/auth/create-bill`, {

@@ -47,7 +47,7 @@ const AppointmentsManage = () => {
           let temp = response.data.appointment;
 
           // Filter appointments to include only those for the specified doctor
-          temp = temp.filter((t) => t.doctor === doctor._id);
+          temp = temp.filter((t) => t.doctor._id === doctor._id);
 
           // Update state with filtered appointments
           setAppointments(temp);

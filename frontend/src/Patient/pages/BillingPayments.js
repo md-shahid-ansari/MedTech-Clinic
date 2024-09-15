@@ -1,71 +1,127 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { IsPatientSessionLive } from '../utils/IsPatientSessionLive';
+import { useNavigate } from 'react-router-dom';
 import './BillingPayments.css';
 
+const URL = process.env.REACT_APP_BACKEND_URL;
+
 const BillingPayments = () => {
-  // Sample billing data
-  const billingHistory = [
-    { date: "2024-08-15", description: "Consultation with Dr. John Doe", amount: "$50.00", status: "Paid" },
-    { date: "2024-08-20", description: "Blood Test", amount: "$30.00", status: "Pending" },
-    // Add more billing records as needed
-  ];
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [bills, setBills] = useState([]);
+  const [filter, setFilter] = useState('all');
+  const navigate = useNavigate();
 
-  const [paymentAmount, setPaymentAmount] = useState('');
+  // Fetch bills and authenticate
+  useEffect(() => {
+    const authenticateAndFetchBills = async () => {
+      const { isAuthenticated , patientData} = await IsPatientSessionLive();
+      if (!isAuthenticated) {
+        setError('You are not authenticated. Please log in again.');
+        navigate('/patient-login');
+        setLoading(false);
+        return;
+      }
 
-  const handlePaymentChange = (e) => {
-    setPaymentAmount(e.target.value);
+      try {
+        const response = await axios.post(`${URL}/api/auth/fetch-bills`);
+        const temp = response.data.bills.filter(
+          (item) => item.patient._id === patientData._id
+        );
+        setBills(temp);
+      } catch (err) {
+        setError('Error fetching bills.');
+      }
+      setLoading(false);
+    };
+
+    authenticateAndFetchBills();
+  }, [navigate]);
+
+
+  // Handle filter change
+  const handleFilterChange = (e) => {
+    setFilter(e.target.value);
   };
 
-  const handlePaymentSubmit = (e) => {
-    e.preventDefault();
-    // Handle payment submission logic here (e.g., processing the payment)
-    console.log(`Processing payment of ${paymentAmount}`);
+  // Mark bill as paid, pending, or cancelled
+  const handleStatusChange = async (billId, newStatus) => {
+    try {
+      await axios.post(`${URL}/api/auth/update-bill-status`, { billId, status: newStatus });
+      setBills(bills.map(bill => bill._id === billId ? { ...bill, status: newStatus } : bill));
+    } catch (error) {
+      setError('Failed to update bill status.');
+    }
   };
 
   return (
-    <div className="billing-payments-container">
-      <h1>Billing and Payments</h1>
-      
-      <div className="billing-history">
-        <h2>Billing History</h2>
-        <table className="billing-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Amount</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {billingHistory.map((item, index) => (
-              <tr key={index}>
-                <td>{item.date}</td>
-                <td>{item.description}</td>
-                <td>{item.amount}</td>
-                <td className={item.status.toLowerCase()}>{item.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="billing-management-container">
+      <h2>Billing Management</h2>
+
+      {/* Filter for Bills */}
+      <div className="filter-container">
+        <label htmlFor="filter">Filter by Status:</label>
+        <select id="filter" value={filter} onChange={handleFilterChange}>
+          <option value="all">All</option>
+          <option value="Paid">Paid</option>
+          <option value="Pending">Pending</option>
+          <option value="Requested">Requested</option>
+          <option value="Cancelled">Cancelled</option>
+          <option value="Confirm">Confirm</option>
+        </select>
       </div>
-      
-      <div className="payment-form">
-        <h2>Make a Payment</h2>
-        <form onSubmit={handlePaymentSubmit}>
-          <div className="form-group">
-            <label htmlFor="amount">Amount:</label>
-            <input
-              type="number"
-              id="amount"
-              name="amount"
-              value={paymentAmount}
-              onChange={handlePaymentChange}
-              placeholder="Enter amount"
-              required
-            />
-          </div>
-          <button type="submit" className="submit-btn">Pay Now</button>
-        </form>
+
+      {/* Displaying Bills */}
+      <div className="billing-list">
+        {loading ? (
+          <p>Loading bills...</p>
+        ) : error ? (
+          <p className="error-message">{error}</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Appointment ID</th>
+                <th>Doctor</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bills
+                .filter((bill) => filter === 'all' || bill.status === filter)
+                .map((bill) => (
+                  <tr key={bill._id}>
+                    <td>{bill.appointment.appointmentId}</td>
+                    <td>{bill.doctor.name + ' ID' + bill.doctor.doctorId}</td>
+                    <td>{bill.amount}</td>
+                    <td>{new Date(bill.billDate).toLocaleDateString()}</td>
+                    <td>{bill.status}</td>
+                    <td>
+                      <button
+                        onClick={() => handleStatusChange(bill._id, 'Confirm')}
+                        className="status-btn"
+                        disabled={bill.status === 'Confirm'}
+                      >
+                        Confirm
+                      </button>
+            
+                      <button
+                        onClick={() => handleStatusChange(bill._id, 'Cancelled')}
+                        className="status-btn"
+                        disabled={bill.status === 'Cancelled'}
+                      >
+                        Cancel
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
