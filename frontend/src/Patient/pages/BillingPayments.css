@@ -6,6 +6,7 @@
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding-top: 50px;
   }
   
   h1 {
@@ -82,7 +83,7 @@
   }
   
   .submit-btn {
-    background-color: #2a3f54;
+    background-color: #7804ec;
     color: white;
     padding: 10px;
     border: none;
@@ -92,5 +93,5 @@
   }
   
   .submit-btn:hover {
-    background-color: #1e2f40;
+    background-color: #4f089c;
   }

@@ -89,6 +89,8 @@ const App = () => {
           <Route path="clinic-profile-settings" element={<ClinicProfileSettings />} />
           <Route path="doctor-list" element={<DoctorList />} />
         </Route>
+        {/* catch all routes */}
+				<Route path='*' element={<Navigate to='/' replace />} />
       </Routes>
     </Router>
   );

@@ -47,16 +47,16 @@ function HeroSection() {
         return () => clearInterval(interval);
     }, []);
 
-    const handleDotClick = (index) => {
-        setCurrentSlide(index);
-    };
+    // const handleDotClick = (index) => {
+    //     setCurrentSlide(index);
+    // };
 
     return (
         <section className="hero">
             <div className={`text-container ${currentSlide === 0 ? 'slide-in-left' : ''}`}>
                 <h2>{slides[currentSlide].text}</h2>
                 <p>{slides[currentSlide].subText}</p>
-                <div className="dots">
+                {/* <div className="dots">
                     {slides.map((_, index) => (
                         <span
                             key={index}
@@ -64,7 +64,7 @@ function HeroSection() {
                             onClick={() => handleDotClick(index)}
                         ></span>
                     ))}
-                </div>
+                </div> */}
             </div>
             <div className={`hero-image-container ${currentSlide === 0 ? 'slide-in-right' : ''}`}>
                 <img src={slides[currentSlide].image} alt="Healthcare" className="hero-image" />

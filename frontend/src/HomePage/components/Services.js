@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import './Services.css';
 import serviceImage1 from '../assets/image3.jpg';
 import serviceImage2 from '../assets/image4.jpg';
-
+import serviceImage3 from '../assets/health.jpg'
 
 
 const featureData = [
@@ -69,7 +69,30 @@ function Services() {
                 <div className="arrows">
                         <button onClick={handlePrev} className="arrow-button">←</button>
                         <button onClick={handleNext} className="arrow-button">→</button>
+                </div>
+                <div className="about-us">
+                    <div className="about-us-img">
+                        <img src={serviceImage3} ></img>
                     </div>
+                    <div className="about-us-text">
+                        <h2>About Us</h2>
+                        <p>
+                            At MedTech Clinic, we are committed to delivering personalized,
+                            high-quality healthcare that empowers you to take control of your
+                            well-being. We combine innovation with compassionate care to offer
+                            a variety of services tailored to meet your individual needs. Our
+                            team of dedicated healthcare professionals uses the latest
+                            technology to provide you with a seamless, efficient experience.
+                            From booking appointments to managing your health records, we
+                            ensure convenience and accessibility at every step. At MedTech
+                            Clinic, your health is our priority. Whether you're here for a
+                            routine check-up, consultation, or specialized treatment, you can
+                            trust our team to provide the best care possible. Join us in
+                            redefining healthcare excellence, where your well-being always
+                            comes first.
+                        </p>
+                    </div>
+                </div>
             </div>
         </section>
     );

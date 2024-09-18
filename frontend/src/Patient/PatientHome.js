@@ -7,7 +7,7 @@ const PatientHome = () => {
   return (
     <div className="dashboard">
       <header>
-        <h1>Clinic Name</h1>
+        <h1>MedTech Clinic</h1>
         <div className="profile">
           <Link to="patient-profile-settings">Patient Profile</Link>
         </div>

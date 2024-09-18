@@ -27,13 +27,14 @@
   .save-btn {
     width: 100%;
     padding: 10px;
-    background-color: #4caf50;
+    background-color: #8a28f5 !important;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    margin-left: 0px !important;
   }
   
   .save-btn:hover {
-    background-color: #45a049;
+    background-color: #4b0280 !important;
   }

@@ -3,7 +3,7 @@ import {Link , useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import './ClinicHome.css'
 
-const URL = 'http://localhost:5000';
+const URL = process.env.REACT_APP_BACKEND_URL; // Ensure this is correctly set in .env
 
 const ClinicSidebar = () => {
   

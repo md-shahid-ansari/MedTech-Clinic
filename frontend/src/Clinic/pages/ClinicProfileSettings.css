@@ -42,7 +42,7 @@ input[type="password"] {
 }
 
 .save-btn {
-  background-color: #4CAF50;
+  background-color: #8704c8 !important;
   color: white;
   border: none;
   padding: 10px 15px;
@@ -51,5 +51,5 @@ input[type="password"] {
 }
 
 .save-btn:hover {
-  background-color: #45a049;
+  background-color: #5b0196 !important;
 }

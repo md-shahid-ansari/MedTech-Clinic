@@ -2,6 +2,7 @@
   padding: 20px;
   max-width: 1000px;
   margin: auto;
+  padding-top: 50px;
 }
 
 .prescriptions-container h1 {
@@ -11,7 +12,7 @@
 .prescription-details {
   margin-bottom: 20px;
   padding: 15px;
-  border: 1px solid #ddd;
+  border: 1px solid #8f02f6;
   border-radius: 5px;
 }
 

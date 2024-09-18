@@ -4,6 +4,7 @@
   margin: 0 auto;
   background-color: #f4f4f4;
   padding: 20px;
+  padding-top: 50px;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
@@ -64,7 +65,7 @@ h1 {
 .submit-btn {
   padding: 10px 20px;
   border: none;
-  background-color: #2a3f54;
+  background-color: #7804ec;
   color: white;
   border-radius: 4px;
   cursor: pointer;
@@ -72,5 +73,5 @@ h1 {
 }
 
 .submit-btn:hover {
-  background-color: #1b2a3a;
+  background-color: #4f089c;
 }

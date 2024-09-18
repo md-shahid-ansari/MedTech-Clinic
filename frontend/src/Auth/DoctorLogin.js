@@ -82,41 +82,58 @@ const DoctorLogin = () => {
   };
 
   return (
-    <div className="login-container">
-      <h2>Doctor Login</h2>
-      <button><Link to="/">Home</Link></button>
-      <form onSubmit={handleSubmit} className="login-form">
-        <div className="form-group">
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <button type="button" className="forgot-btn" disabled={loadingForgot} onClick={handleForgot}>
-          {loadingForgot ? 'Sending reset link...' : 'Forgot?'}
+    <div className="doctor-login-page">
+      <div className="doctor-login-left-container">
+        <button className="hm-btn">
+          <Link to="/">← Back</Link>
         </button>
-        {error && <div className="error-message">{error}</div>}
-        <button type="submit" className="login-btn" disabled={loadingLogin}>
-          {loadingLogin ? 'Logging in...' : 'Login'}
-        </button>
-        <p><Link to="/doctor-register">Not registered? Click here to register!</Link></p>
-      </form>
+        <h2>Welcome Back!!</h2>
+      </div>
+      <div className="doctor-login-right-container">
+        <h2>Doctor Login</h2>
+        
+        <form onSubmit={handleSubmit} className="doctor-login-form">
+          <div className="doctor-form-group">
+            <label htmlFor="email">Username:</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="doctor-form-group">
+            <label htmlFor="password">Password:</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+            <button type="submit" className="login-btn" disabled={loadingLogin}>
+            {loadingLogin ? "Logging in..." : "Login"}
+          </button>
+          </div>
+          <button
+            type="button"
+            className="forgot-btn"
+            disabled={loadingForgot}
+            onClick={handleForgot}
+          >
+            {loadingForgot ? "Sending reset link..." : "Forgot Password?"}
+          </button>
+          {error && <div className="error-message">{error}</div>}
+          <p>
+            <Link to="/doctor-register">
+              Not registered? Click here to register!
+            </Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 };

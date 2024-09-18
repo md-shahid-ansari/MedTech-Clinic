@@ -101,87 +101,92 @@ const PatientRegister = () => {
   };
 
   return (
-    <div className="register-container">
-      <h2>Patient Registration</h2>
-      <button><Link to="/">Home</Link></button>
-      
-      {!isOtpSent ? (
-
-      <form onSubmit={handleSubmit} className="register-form">
-        <div className="form-group">
-          <label htmlFor="name">Name:</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="confirmPassword">Confirm Password:</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        {error && <div className="error-message">{error}</div>}
-        <button type="submit" className="register-btn" disabled={loading}>
-          {loading ? 'Registering...' : 'Register'}
+    <div className="register-page">
+      <div className="register-left-container">
+        
+        <button className="reg-btn">
+          <Link to="/">← Back</Link>
         </button>
-        <p>
-          <Link to="/patient-login">Already registered? Click here to login!</Link>
-        </p>
-      </form>
-
-      ) : (
-
-      <form onSubmit={handleOtpSubmit} className="verification-form">
-        <div className="form-group">
-          <label htmlFor="otp">Enter 6 digit otp sent to you email:</label>
-          <input
-            type="text"
-            id="otpe"
-            name="otp"
-            value={formData.otp}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        {error && <div className="error-message">{error}</div>}
-        <button type="submit" className="register-btn" disabled={loading}>
-          {loading ? 'Verifying...' : 'Verify'}
-        </button>
-      </form>
-
-      )}
+        <h2>Patient Registration</h2>
+        {!isOtpSent ? (
+          <form onSubmit={handleSubmit} className="register-form">
+            <div className="reg-form-group">
+              <label htmlFor="name">Full Name:</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="reg-form-group">
+              <label htmlFor="email">Email Id:</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="reg-form-group">
+              <label htmlFor="password">Password:</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="reg-form-group">
+              <label htmlFor="confirmPassword">Confirm Password:</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            {error && <div className="error-message">{error}</div>}
+            <button type="submit" className="register-btn" disabled={loading}>
+              {loading ? "Registering..." : "Register"}
+            </button>
+            <p>
+              <Link to="/patient-login">
+                Already registered? Click here to login!
+              </Link>
+            </p>
+          </form>
+        ) : (
+          <form onSubmit={handleOtpSubmit} className="verification-form">
+            <div className="reg-form-group">
+              <label htmlFor="otp">Enter 6 digit otp sent to you email:</label>
+              <input
+                type="text"
+                id="otpe"
+                name="otp"
+                value={formData.otp}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            {error && <div className="error-message">{error}</div>}
+            <button type="submit" className="register-btn" disabled={loading}>
+              {loading ? "Verifying..." : "Verify"}
+            </button>
+          </form>
+        )}
+      </div>
+      <div className="register-right-container">
+        <h2>Welcome to MedTech Clinic!!</h2>
+      </div>
     </div>
   );
 };

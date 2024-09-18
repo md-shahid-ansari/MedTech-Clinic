@@ -57,7 +57,6 @@ const TestResults = () => {
 
       {!loading && !error && (
         <div className="results-table">
-          <h2>Submitted Test Results</h2>
           <table>
             <thead>
               <tr>
