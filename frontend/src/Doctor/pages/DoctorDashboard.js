@@ -511,8 +511,9 @@ const DoctorDashboard = () => {
                 onChange={(e) => setDiagnosis(e.target.value)}
               />
               <div>
-                <label>Is Emergency: </label>
+                <label className='checkbox_label'>Is Emergency: </label>
                 <input
+                  className='checkbox'
                   type="checkbox"
                   checked={isEmergency}
                   onChange={(e) => setIsEmergency(e.target.checked)}

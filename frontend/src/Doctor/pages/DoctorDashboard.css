@@ -302,7 +302,19 @@
 }
 
 .prescription-details textarea {
-  width: 100%;
+  width: 98%;
   height: 100px;
   margin: 10px 0;
+}
+
+.prescription-details input {
+  width: 98%;
+}
+
+.prescription-details checkbox_label {
+  width: 200px;
+
+}
+.prescription-details checkbox {
+  width: 40px;
 }
