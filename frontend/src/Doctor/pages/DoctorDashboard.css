@@ -311,10 +311,16 @@
   width: 98%;
 }
 
-.prescription-details checkbox_label {
-  width: 200px;
-
+.prescription-details label {
+  display: inline;
+  font-weight: lighter;
+  padding-top: 10px;
 }
-.prescription-details checkbox {
-  width: 40px;
+.prescription-details input[type=checkbox] {
+  width: 20px;
+  height: 20px; /* Add height to make it proportionally larger */
+}
+
+.prescription-details input[type=date] {
+  width: 86%;
 }

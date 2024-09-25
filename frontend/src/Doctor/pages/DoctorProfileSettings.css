@@ -1,40 +1,126 @@
+/* Doctor Profile Settings Container */
 .doctor-profile-settings-container {
-    max-width: 500px;
-    margin: 50px auto;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Styles */
+.profile-settings-form .form-group {
+  margin-bottom: 15px;
+}
+
+.profile-settings-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #34495e;
+}
+
+.profile-settings-form input[type="text"],
+.profile-settings-form input[type="date"],
+.profile-settings-form textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+/* Textarea Style */
+.profile-settings-form textarea {
+  height: 80px; /* Adjust height for text area */
+  max-width: 95%;
+  min-width: 95%;
+  min-height: 80px;
+}
+
+.profile-settings-form input[type="email"],
+.profile-settings-form input[type="number"],
+.profile-settings-form input[type="tel"]{
+  width: 95%;
+  max-width: 95%;
+}
+
+/* Button Styles */
+.save-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #8a28f5 !important; /* Primary color for the save button */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 0px !important;
+}
+
+.save-btn:hover {
+  background-color: #4b0280 !important; /* Darker shade on hover */
+}
+
+/* Availability Section */
+.availability-section {
+  margin: 20px 0;
+}
+
+.availability-section h3 {
+  color: #2980b9;
+  margin-bottom: 10px;
+}
+
+.time-slot,
+.unavailable-date {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* Button for Adding Time Slots/Unavailable Dates */
+.add-btn {
+  background-color: #3498db; /* Blue color for add buttons */
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-btn:hover {
+  background-color: #2980b9; /* Darker blue on hover */
+}
+
+/* Delete Button Style */
+.delete-btn {
+  background-color: #e74c3c; /* Red color for delete buttons */
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  margin-left: 10px;
+}
+
+.delete-btn:hover {
+  background-color: #c0392b; /* Darker red on hover */
+}
+
+/* Responsive Styles */
+@media (max-width: 600px) {
+  .doctor-profile-settings-container {
+    padding: 15px;
   }
-  
-  .profile-settings-form .form-group {
-    margin-bottom: 15px;
+
+  .profile-settings-form input[type="text"],
+  .profile-settings-form input[type="date"],
+  .profile-settings-form textarea {
+    font-size: 14px; /* Smaller font size for mobile */
   }
-  
-  .profile-settings-form label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
+
+  .save-btn,
+  .add-btn,
+  .delete-btn {
+    font-size: 14px; /* Adjust button font size for mobile */
   }
-  
-  .profile-settings-form input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  .save-btn {
-    width: 100%;
-    padding: 10px;
-    background-color: #8a28f5 !important;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-left: 0px !important;
-  }
-  
-  .save-btn:hover {
-    background-color: #4b0280 !important;
-  }
+}
