@@ -42,8 +42,8 @@ const ClinicSidebar = () => {
       <ul>
         <li><Link to="test-results-manage">Test Results</Link></li>
         <li><Link to="prescription-logs">Prescription Logs</Link></li>
-        <li><Link to="manage-appointments">Appointments Management</Link></li>
-        <li><Link to="billing-management">Billing Management</Link></li>
+        <li><Link to="manage-appointments">Appointments Logs</Link></li>
+        <li><Link to="billing-management">Billing Logs</Link></li>
         <li><Link to="doctor-list">Doctors</Link></li>
       </ul>
       <div className='divForLine'/>
